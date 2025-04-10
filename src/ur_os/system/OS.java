@@ -25,6 +25,7 @@ import static ur_os.memory.MemoryManagerType.CONTIGUOUS;
 import ur_os.memory.SystemMemoryManager;
 import ur_os.memory.contiguous.PMM_Contiguous;
 import ur_os.memory.freememorymagament.FreeMemorySlotManagerType;
+import ur_os.memory.freememorymagament.NextFitMemorySlotManager;
 import ur_os.memory.paging.MemoryPageExchange;
 import ur_os.memory.paging.SMM_Paging;
 import ur_os.memory.segmentation.SMM_Segmentation;
@@ -56,7 +57,7 @@ public class OS {
     public static final int MAX_PROCESS_PRIORITY = 10; //Page size in bytes
     public static final int PAGE_SIZE = 64; //Page size in bytes
     public static final MemoryManagerType SMM = MemoryManagerType.CONTIGUOUS;
-    public static final FreeMemorySlotManagerType MSM = FreeMemorySlotManagerType.FIRST_FIT;
+    public static final FreeMemorySlotManagerType MSM = FreeMemorySlotManagerType.NEXT_FIT;
     
     public static final ProcessVirtualMemoryManagerType PVMM = ProcessVirtualMemoryManagerType.FIFO;
     public static final int FRAMES_PER_PROCESS = 3; //Maximum number of frames assigned to a process, if virtual memory is on
@@ -87,19 +88,22 @@ public class OS {
              
              
             switch(MSM){
-            case FIRST_FIT:
-                fmm = new FirstFitMemorySlotManager(SystemOS.MEMORY_SIZE); //Memory
-                fvmm= new FirstFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE); //Swap memory
-                break;
-            case BEST_FIT:
-                fmm = new BestFitMemorySlotManager(SystemOS.MEMORY_SIZE);
-                fvmm = new BestFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE);
-                
-                break;
-            case WORST_FIT:
-                fmm = new WorstFitMemorySlotManager(SystemOS.MEMORY_SIZE);
-                fvmm = new WorstFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE);
-                break;
+                case FIRST_FIT:
+                    fmm = new FirstFitMemorySlotManager(SystemOS.MEMORY_SIZE); //Memory
+                    fvmm= new FirstFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE); //Swap memory
+                    break;
+                case BEST_FIT:
+                    fmm = new BestFitMemorySlotManager(SystemOS.MEMORY_SIZE);
+                    fvmm = new BestFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE);
+
+                    break;
+                case WORST_FIT:
+                    fmm = new WorstFitMemorySlotManager(SystemOS.MEMORY_SIZE);
+                    fvmm = new WorstFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE);
+                    break;
+                case NEXT_FIT:
+                    fmm = new NextFitMemorySlotManager(SystemOS.MEMORY_SIZE);
+                    fvmm = new NextFitMemorySlotManager(SystemOS.SWAP_MEMORY_SIZE);
             }
         }
          
