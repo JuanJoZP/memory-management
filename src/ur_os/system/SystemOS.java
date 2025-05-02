@@ -5,8 +5,6 @@
  */
 package ur_os.system;
 
-import ur_os.process.ProcessInstructionType;
-import ur_os.memory.contiguous.SMM_Contiguous;
 import ur_os.memory.Memory;
 import ur_os.memory.MemoryManagerType;
 import ur_os.process.Process;
@@ -19,6 +17,8 @@ import ur_os.process.EndInstruction;
 import ur_os.process.IOInstruction;
 import ur_os.process.Instruction;
 import ur_os.virtualmemory.SwapMemory;
+import ur_os.memory.freememorymagament.MemorySlot;
+import ur_os.memory.paging.PMM_Paging;
 
 /**
  *
@@ -324,7 +324,9 @@ public class SystemOS implements Runnable{
             for (Process p : ps) {
                 os.create_process(p);
                 System.out.println("Process Created: "+p.getPid()+"\n"+p);
-                
+                if (p.getPMM().getClass() == PMM_Paging.class) {
+                    System.out.println("Internal fragmentation: " + ((PMM_Paging)p.getPMM()).calcUnusedBytes() + " bytes");
+                }
                 showFreeMemory();
             } //If the scheduler is preemtive, this action will trigger the extraction from the CPU, is any process is there.
             
@@ -405,6 +407,40 @@ public class SystemOS implements Runnable{
         }
         
         System.out.println(sb.toString());
+    }
+    
+    public double calcExternalFragmentation() {
+       
+        FreeMemorySlotManager slotManager = (FreeMemorySlotManager) os.fmm;
+        ArrayList<MemorySlot> freeSlots = slotManager.getMemorySlotsCopy();
+    
+        if (freeSlots.size() <= 1) return 0; // No fragmentation if there are 0 or 1 slots
+    
+        // find largest
+        MemorySlot largest = null;
+        int maxSize = Integer.MIN_VALUE;
+        for (MemorySlot slot : freeSlots) {
+            int size = slot.getSize();
+            if (size > maxSize) {
+                maxSize = size;
+                largest = slot;
+            }
+        }
+    
+        // average size of free slots (excluding the largest)
+        freeSlots.remove(largest);
+        int total = 0;
+    
+        for (MemorySlot slot : freeSlots) {
+            total += slot.getSize();
+        }
+    
+        try {
+            double avg = total / freeSlots.size();
+            return avg;
+        } catch (ArithmeticException e) { // division by zero
+            return 0;
+        }
     }
     
     

@@ -130,16 +130,17 @@ public class OS {
     
     
     public void interrupt(InterruptType t, Process p, Object i){
-       
         ProcessMemoryManager pmm;
         MemorySlot m;
         MemorySlot vm;
         MemoryPageExchange mpe;
         
         switch(t){
-            
             case CPU_TO_MEMORY:
                 cpu.addProcessToMemoryUnit(p);
+                if (SMM != MemoryManagerType.PAGING) {
+                    System.out.println("External fragmentation after adding process "+ p.getPid() + " to memory: " + system.calcExternalFragmentation());
+                }
                 break;
         
             case CPU_TO_IO:
@@ -151,16 +152,19 @@ public class OS {
                 p.setTime_finished(system.getTime());
                 System.out.println("Process Terminated: "+p.getPid()+" "+p.getSize());
                 fmm.reclaimMemory(p);
+                if (SMM != MemoryManagerType.PAGING) {
+                    System.out.println("External fragmentation: " + system.calcExternalFragmentation());
+                }
                 system.showFreeMemory();
                 break;
             
             case IO_DONE: //It is assumed that the process in IO is done and it has been removed from the queue
                 rq.addProcess(p);
-            break;
+                break;
 
             case MEMORY_DONE: //It is assumed that the process in Memory is done and it has been removed from the queue
                 rq.addProcess(p);
-            break;
+                break;
             
             case SCHEDULER_CPU_TO_RQ:
                 //When the scheduler is preemptive and will send the current process in CPU to the Ready Queue
@@ -169,16 +173,12 @@ public class OS {
                 if(p != null){
                     cpu.addProcess(p);
                 }
+                break;
                 
-            break;
-            
-            
             case SCHEDULER_RQ_TO_CPU:
                 //When the scheduler defined which process will go to CPU
                 cpu.addProcess(p);
-                
-            break;
-            
+                break;
             
             /*
             ******Virtual memory interruptions*********

@@ -34,6 +34,10 @@ public abstract class FreeMemorySlotManager extends FreeMemoryManager{
     
     public abstract MemorySlot getSlot(int size);
     
+    public ArrayList<MemorySlot> getMemorySlotsCopy() {
+        return new ArrayList<>(list);
+    }
+    
     public void fuseSlots(){
         int tam = list.size();
         for (int i = 0; i < tam-1; i++) {

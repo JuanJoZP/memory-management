@@ -48,6 +48,14 @@ public class PMM_Paging extends ProcessMemoryManager{
             System.out.println("Error - Wrong PMM parameter");
         }
     }
+    
+    public int calcUnusedBytes(){
+        int allocated = pt.getSize() * OS.PAGE_SIZE;
+        int used = this.getSize();
+        return allocated - used;
+
+    
+    }
 
     public int getAssignedPages() {
         return assignedPages;
